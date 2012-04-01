@@ -3,7 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>fileBeetle</title>
-        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
     </head>
     <?php include 'conf.php'; ?>
     <?php
@@ -14,8 +14,34 @@
     $dir            = $base_dir;
     $path           = "";
     $topic_path     = '<li><a href="?d=">'.$ROOTDIR_TEXT.'</a></li>';
-    $alart_style    = "";
+    $alert_style    = "";
     $info_style     = "";
+    
+    $proc_message   = "";
+    $proc_style     = "style='display:none'";
+    $proc_class     = "";
+    
+    if (isset($_GET["d"])) {
+        $dir .= $_GET["d"];
+    }
+    
+    if (isset($_POST['proc'])) {
+        $proc_style = "";
+        if ($_POST['proc']=="0") {
+            // make directory
+            if (mkdir($dir."/".$_POST['txt_dir'])) {
+                $proc_message   = $MESSAGE_MAKE_DIR_SUCCESS;
+                $proc_class     = "alert alert-success";
+            } else {
+                $proc_message   = $MESSAGE_MAKE_DIR_FAILED;
+                $proc_class     = "alert alert-error";
+            }
+        }
+        if ($_POST['proc']=="1") {
+            // upload file
+            
+        }
+    }
     ?>
     <body>
         <span class="row">
@@ -23,9 +49,6 @@
                 <h1>fileBeetle</h1>
                 <br />
                 <?php
-                if (isset($_GET["d"])) {
-                    $dir .= $_GET["d"];
-                }
                 // topic path
                 $array_path = preg_split("/\//", $_GET["d"]);
                 array_shift($array_path);
@@ -82,6 +105,79 @@
                 ?>
             </span>
         </span>
+        
+        <span class="row">
+            <span class="span12">
+                <a class="btn pull-right" data-toggle="modal" href="#uploadModal" >
+                    <i class="icon-upload"></i>
+                    Upload file
+                </a>
+                <span class="pull-right">&nbsp;</span>
+                <a class="btn pull-right" data-toggle="modal" href="#mkdirModal" >
+                    <i class="icon-folder-close"></i>
+                    Create directory
+                </a>
+                <br />&nbsp;
+                
+                <div class="modal hide fade" id="uploadModal">
+                    <form class="form-inline" name="form_upload" id="form_upload" method="post" action="" >
+                        <div class="modal-header">
+                            <a class="close" data-dismiss="modal">×</a>
+                            <h3>Upload a file here.</h3>
+                        </div>
+                        <div class="modal-body">
+                            <input type="file" class="btn" name="file_select" id="file_select" />
+                            <label class="checkbox">
+                                <input type="checkbox" class="" name="check_overwrite" id="check_overwrite" /> Overwrite
+                            </label>
+                            <input type="hidden" name="proc" id="hd_upload" value="1" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" id="btn_upload">
+                                <i class="icon-ok icon-white"></i>
+                                Upload
+                            </button>
+                            <a href="" class="btn" data-dismiss="modal">
+                                <i class="icon-remove"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="modal hide fade" id="mkdirModal">
+                    <form class="form-inline" name="form_mkdir" id="form_mkdir" method="post" action="" >
+                        <div class="modal-header">
+                            <a class="close" data-dismiss="modal">×</a>
+                            <h3>Create a directory here.</h3>
+                        </div>
+                        <div class="modal-body">                        
+                            <input type="text" class="span5" name="txt_dir" id="txt_dir" placeholder="type directory name…" />
+                            <input type="hidden" name="proc" id="hd_mkdir" value="0" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" id="btn_dir">
+                                <i class="icon-ok icon-white"></i>
+                                Create
+                            </button>
+                            <a href="" class="btn" data-dismiss="modal">
+                                <i class="icon-remove"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+            </span>
+        </span>
+        
+        <span class="row" <?=$proc_style?>>
+            <span class="span12">
+                <div class="<?=$proc_class?>">
+                    <a class="close" data-dismiss="alert">×</a>
+                    <p><?=$proc_message?></p>
+                </div>
+            </span>
+        </span>
+        
         <span class="row">
             <span class="span12">
                 <?php
@@ -90,10 +186,10 @@
                     print "<table class='table'>".$cr;
                     print "<thead>".$cr;
                     print "<tr>".$cr;
-                    print "<th class='span6'>name</th>".$cr;
+                    print "<th class='span7'>name</th>".$cr;
                     print "<th class='span2'>date</th>".$cr;
                     print "<th class='span2'>size</th>".$cr;
-                    print "<th class='span2'>function</th>".$cr;
+                    print "<th class='span1'>function</th>".$cr;
                     print "</tr>".$cr;
                     print "</thead>".$cr;
                     print "<tbody>".$cr;
@@ -112,14 +208,14 @@
                 } else {
                     $message = $MESSAGE_EMPTY;
                 }
-                
+                // message style
                 if ($message=="") {
-                    $alart_style = "style='visibility:hidden'";
+                    $alert_style = "style='display:none'";
                 } else {
-                    $info_style  = "style='visibility:hidden'";
+                    $info_style  = "style='display:none'";
                 }
                 ?>
-                <div class="alert" <?=$alart_style?>>
+                <div class="alert" <?=$alert_style?>>
                     <p><?=$message?></p>
                 </div>
                 <div class="alert alert-info" <?=$info_style?>>
@@ -128,5 +224,8 @@
                 </div>
             </span>
         </span>
+
+        <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
     </body>
 </html>
