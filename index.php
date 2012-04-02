@@ -12,6 +12,7 @@
     $array_file     = array();
     $array_data     = array();
     $dir            = $base_dir;
+    $param_d        = "";
     $path           = "";
     $topic_path     = '<li><a href="?d=">'.$ROOTDIR_TEXT.'</a></li>';
     $alert_style    = "";
@@ -22,24 +23,42 @@
     $proc_class     = "";
     
     if (isset($_GET["d"])) {
-        $dir .= $_GET["d"];
+        $param_d = htmlspecialchars($_GET["d"]);
+        $dir .= $param_d;
     }
     
     if (isset($_POST['proc'])) {
         $proc_style = "";
         if ($_POST['proc']=="0") {
             // make directory
-            if (mkdir($dir."/".$_POST['txt_dir'])) {
+            if (mkdir($dir."/".htmlspecialchars($_POST['txt_dir']))) {
                 $proc_message   = $MESSAGE_MAKE_DIR_SUCCESS;
-                $proc_class     = "alert alert-success";
+                $proc_class     = $ALERT_SUCCESS;
             } else {
                 $proc_message   = $MESSAGE_MAKE_DIR_FAILED;
-                $proc_class     = "alert alert-error";
+                $proc_class     = $ALERT_ERROR;
             }
         }
         if ($_POST['proc']=="1") {
             // upload file
-            
+            if (is_uploaded_file($_FILES["file"]["tmp_name"])) {
+                if (isset($_POST['check_overwrite']) || !file_exists($dir."/".$_FILES["file"]["name"])) {
+                    if (move_uploaded_file($_FILES["file"]["tmp_name"], $dir."/".$_FILES["file"]["name"])) {
+                        chmod($dir."/".$_FILES["file"]["name"], 0644);
+                        $proc_message = $_FILES["file"]["name"]." is uploaded.";
+                        $proc_class     = $ALERT_SUCCESS;
+                    } else {
+                        $proc_message = $MESSAGE_UPLOAD_FAILED;
+                        $proc_class   = $ALERT_ERROR;
+                    }
+                } else {
+                    $proc_message = $MESSAGE_UPLOAD_FILE_EXISTS;
+                    $proc_class   = $ALERT_ERROR;
+                }
+            } else {
+                $proc_message = $MESSAGE_UPLOAD_CHOOSE_FILE;
+                $proc_class   = $ALERT_ERROR;
+            }
         }
     }
     ?>
@@ -50,7 +69,7 @@
                 <br />
                 <?php
                 // topic path
-                $array_path = preg_split("/\//", $_GET["d"]);
+                $array_path = preg_split("/\//", $param_d);
                 array_shift($array_path);
                 foreach ($array_path as $value) {
                     $path       .= "/".$value;
@@ -67,7 +86,7 @@
                             if ($entry != "." && $entry != "..") {
                                 array_push($array_dir,
                                         array(
-                                            "<a href='?d=".$_GET["d"]."/".$entry."'><i class='icon-folder-open'></i>&nbsp;".$entry."</a>"
+                                            "<a href='?d=".$param_d."/".$entry."'><i class='icon-folder-open'></i>&nbsp;".$entry."</a>"
                                             ,"-"
                                             ,"-"
                                         ));
@@ -120,13 +139,13 @@
                 <br />&nbsp;
                 
                 <div class="modal hide fade" id="uploadModal">
-                    <form class="form-inline" name="form_upload" id="form_upload" method="post" action="" >
+                    <form class="form-inline" name="form_upload" id="form_upload" method="post" enctype="multipart/form-data" action="" >
                         <div class="modal-header">
                             <a class="close" data-dismiss="modal">×</a>
                             <h3>Upload a file here.</h3>
                         </div>
                         <div class="modal-body">
-                            <input type="file" class="btn" name="file_select" id="file_select" />
+                            <input type="file" class="btn" name="file" id="file" />
                             <label class="checkbox">
                                 <input type="checkbox" class="" name="check_overwrite" id="check_overwrite" /> Overwrite
                             </label>
