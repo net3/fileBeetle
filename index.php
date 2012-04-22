@@ -5,13 +5,36 @@
         <title>fileBeetle</title>
         <link href="css/bootstrap.min.css" rel="stylesheet">
     </head>
-    <?php include 'conf.php'; ?>
     <?php
+    // base directory
+    $BASE_DIR                   = "./CABINET";
+    // carriage return
+    $CR                         = "\r\n";
+    // root title
+    $ROOTDIR_TEXT               = "root";
+    $ALERT_SUCCESS              = "alert alert-success";
+    $ALERT_ERROR                = "alert alert-error";
+    // message
+    $MESSAGE_MAKE_DIR_SUCCESS   = "Create directory Success!";
+    $MESSAGE_MAKE_DIR_FAILED    = "Create directory Faild!";
+    $MESSAGE_UPLOAD_SUCCESS     = "Upload file Success!";
+    $MESSAGE_UPLOAD_FAILED      = "Upload file Failed!";
+    $MESSAGE_UPLOAD_CHOOSE_FILE = "Choose a file.";
+    $MESSAGE_UPLOAD_FILE_EXISTS = "A file already exists.";
+    $MESSAGE_DELETE_SUCCESS     = "Delete Success!";
+    $MESSAGE_DELETE_FALSE       = "Delete False!";
+    $MESSAGE_CANT_READ          = "Directory cannot be read.";
+    $MESSAGE_EMPTY              = "Directory is empty.";
+    $MESSAGE_INFO_TITLE         = "If you get a file...";
+    $MESSAGE_INFOMATION         = "Click on a link with your right mouse button.<br />".
+                        "Select or [Save Target As...] (Internet Explorer)".
+                        "or [Save Link As] (Firefox) from the pop-up menu.<br />".
+                        "Select a folder to save the file and click [Save].";
+    
     $message        = "";
     $array_dir      = array();
     $array_file     = array();
-    $array_data     = array();
-    $dir            = $base_dir;
+    $dir            = $BASE_DIR;
     $param_d        = "";
     $path           = "";
     $topic_path     = '<li><a href="?d=">'.$ROOTDIR_TEXT.'</a></li>';
@@ -21,6 +44,23 @@
     $proc_message   = "";
     $proc_style     = "style='display:none'";
     $proc_class     = "";
+    
+    // delete directory and files
+    function remove_directory($dir) {
+        if ($handle = opendir("$dir")) {
+            while (false !== ($item = readdir($handle))) {
+                if ($item != "." && $item != "..") {
+                    if (is_dir("$dir/$item")) {
+                        remove_directory("$dir/$item");
+                    } else {
+                        unlink("$dir/$item");
+                    }
+                }
+            }
+            closedir($handle);
+            rmdir($dir);
+        }
+    }
     
     if (isset($_GET["d"])) {
         $param_d = htmlspecialchars($_GET["d"]);
@@ -60,6 +100,27 @@
                 $proc_class   = $ALERT_ERROR;
             }
         }
+        if ($_POST['proc']=="2") {
+            // delete
+            if ($_POST['deltype']=="D") {
+                // delete director
+                remove_directory($dir.'/'.$_POST['name']);
+                $proc_message = $MESSAGE_DELETE_SUCCESS;
+                $proc_class     = $ALERT_SUCCESS;
+            } else if ($_POST['deltype']=="F") {
+                // delete file
+                if (unlink($dir.'/'.$_POST['name'])) {
+                    $proc_message = $MESSAGE_DELETE_SUCCESS;
+                    $proc_class     = $ALERT_SUCCESS;
+                } else {
+                    $proc_message = $MESSAGE_DELETE_FALSE;
+                    $proc_class   = $ALERT_ERROR;
+                }
+            } else {
+                $proc_message = $MESSAGE_DELETE_FALSE;
+                $proc_class   = $ALERT_ERROR;
+            }
+        }
     }
     ?>
     <body>
@@ -75,9 +136,9 @@
                     $path       .= "/".$value;
                     $topic_path .= "<span class='divider'>/</span><li><a href='?d=$path'>".$value."</a></li>";
                 }
-                print '<ul class="breadcrumb">'.$cr;
-                print $topic_path.$cr;
-                print '</ul>'.$cr;
+                print '<ul class="breadcrumb">'.$CR;
+                print $topic_path.$CR;
+                print '</ul>'.$CR;
                 // store data
                 if ($handle = opendir($dir)) {
                     while ($entry = readdir($handle)) {
@@ -86,7 +147,8 @@
                             if ($entry != "." && $entry != "..") {
                                 array_push($array_dir,
                                         array(
-                                            "<a href='?d=".$param_d."/".$entry."'><i class='icon-folder-open'></i>&nbsp;".$entry."</a>"
+                                            $param_d."/".$entry
+                                            ,$entry
                                             ,"-"
                                             ,"-"
                                         ));
@@ -109,14 +171,14 @@
                                 
                                 array_push($array_file,
                                         array(
-                                            "<a href='".$dir."/".$entry."'><i class='icon-file'></i>&nbsp;".$entry."</a>"
+                                            $dir
+                                            ,$entry
                                             ,date("Y-m-d H:i", $file_stat['mtime'])
-                                            ,'<span class="pull-right">'.$file_size.'</span>'
+                                            ,$file_size
                                         ));
                             }
                         }
                     }
-                    $array_data = array_merge($array_dir, $array_file);
                     closedir($handle);
                 } else {
                     $message = $MESSAGE_CANT_READ;
@@ -175,11 +237,35 @@
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-primary" id="btn_dir">
-                                <i class="icon-ok icon-white"></i>
-                                Create
+                                <i class="icon-ok icon-white"></i>Create
                             </button>
                             <a href="" class="btn" data-dismiss="modal">
                                 <i class="icon-remove"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="modal hide fade" id="delModal">
+                    <form class="form-inline" name="form_delete" id="form_del" method="post" action="" >
+                        <div class="modal-header">
+                            <a class="close" data-dismiss="modal">×</a>
+                            <h3>Delete.</h3>
+                        </div>
+                        <div class="modal-body">  
+                            <p class="delete" id="txt_del">Delete</p>
+                            <p class="warntext" id="txt_warn">&nbsp;</p>
+                            <input type="hidden" name="deltype" id="hd_deltype" value="0" />
+                            <input type="hidden" name="name" id="hd_name" value="" />
+                            <input type="hidden" name="proc" id="hd_delete" value="2" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" id="btn_del">
+                                <i class="icon-trash icon-white"></i>
+                                Delete
+                            </button>
+                            <a href="" class="btn btn-primary" data-dismiss="modal">
+                                <i class="icon-remove icon-white"></i>Cancel
                             </a>
                         </div>
                     </form>
@@ -201,29 +287,42 @@
             <span class="span12">
                 <?php
                 // print data
-                if (count($array_data)>0) {
-                    print "<table class='table'>".$cr;
-                    print "<thead>".$cr;
-                    print "<tr>".$cr;
-                    print "<th class='span7'>name</th>".$cr;
-                    print "<th class='span2'>date</th>".$cr;
-                    print "<th class='span2'>size</th>".$cr;
-                    print "<th class='span1'>function</th>".$cr;
-                    print "</tr>".$cr;
-                    print "</thead>".$cr;
-                    print "<tbody>".$cr;
-                    foreach ($array_data as $item) {
-                        print "<tr>".$cr;
-                        foreach ($item as $value) {
-                            print "<td>";
-                            print $value;
-                            print "</td>".$cr;
-                        }
-                        print "<td><i class='icon-trash pull-right'></i></td>";
-                        print "</tr>".$cr;
+                if (count($array_dir)>0 || count($array_file)) {
+                    print "<table class='table'>".$CR;
+                    print "<thead>".$CR;
+                    print "<tr>".$CR;
+                    print "<th class='span7'>name</th>".$CR;
+                    print "<th class='span2'>date</th>".$CR;
+                    print "<th class='span2'>size</th>".$CR;
+                    print "<th class='span1'>function</th>".$CR;
+                    print "</tr>".$CR;
+                    print "</thead>".$CR;
+                    print "<tbody>".$CR;
+                    
+                    foreach ($array_dir as $item) {
+                        print "<tr>".$CR;
+                        print "<td><a href='?d=".$item[0]."'><i class='icon-folder-open'></i>&nbsp;".$item[1]."</a></td>";
+                        print "<td>".$item[2]."</td>";
+                        print "<td>".$item[3]."</td>";
+                        print "<td>".
+                            '<button class="btn pull-right trashbtn" name="'.$item[1].'" id="D'.$item[1].'">'.
+                            "<i class='icon-trash pull-right'></i></button></td>";
+                        print "</tr>".$CR;
                     }
-                    print "</tbodt>".$cr;
-                    print "</table>".$cr;
+                    
+                    foreach ($array_file as $item) {
+                        print "<tr>".$CR;
+                        print "<td><a href='".$item[0]."/".$item[1]."'><i class='icon-file'></i>&nbsp;".$item[1]."</a></td>";
+                        print "<td>".$item[2]."</td>";
+                        print "<td>".$item[3]."</td>";
+                        print "<td>".
+                            '<button class="btn pull-right trashbtn" name="'.$item[1].'" id="F'.$item[1].'">'.
+                            "<i class='icon-trash pull-right'></i></button></td>";
+                        print "</tr>".$CR;
+                    }
+                    
+                    print "</tbodt>".$CR;
+                    print "</table>".$CR;
                 } else {
                     $message = $MESSAGE_EMPTY;
                 }
@@ -243,8 +342,26 @@
                 </div>
             </span>
         </span>
-
+        
         <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript">
+            $(function(){
+                var datatype = "";
+                $(".trashbtn").live("click", function(){
+                    if ($(this).attr("id").slice(0, 1)=="D") {
+                        datatype = "ディレクトリ ";
+                        $("#hd_deltype").val("D");
+                        $("#txt_warn").html("ディレクトリ内のすべてのディレクトリ、ファイルも削除されます。");
+                    } else {
+                        datatype = "ファイル ";
+                        $("#hd_deltype").val("F");
+                    }
+                    $("#hd_name").val($(this).attr("name"));
+                    $("#txt_del").html(datatype + $(this).attr("name") + "を削除します。よろしいですか？");
+                    $('#delModal').modal('toggle')
+                })
+            })
+        </script>
     </body>
 </html>
