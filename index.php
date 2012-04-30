@@ -14,10 +14,51 @@
     $ROOTDIR_TEXT               = "root";
     $ALERT_SUCCESS              = "alert alert-success";
     $ALERT_ERROR                = "alert alert-error";
-    // message
+    // Japanese
+    // Button Text
+    $TEXT_UPLOAD_FILE           = "アップロード";
+    $TEXT_CREATE_DIRECTORY      = "フォルダ作成";
+    $TEXT_CREATE                = "作成";
+    $TEXT_UPLOAD                = "アップロード";
+    $TEXT_DELETE                = "削除";
+    $TEXT_CANCEL                = "中止";
+    $TEXT_OVERWRITE             = "上書き";
+    // Text
+    $TEXT_UPLOAD_TITLE          = "ファイルをアップロードします。";
+    $TEXT_CREATE_TITLE          = "フォルダを作成します。";
+    $TEXT_DELETE_TITLE          = "削除します。";
+    $TEXT_TYPE_DIRECTORY_NAME   = "フォルダ名を入力してください。";
+    // Message
+    $MESSAGE_MAKE_DIR_SUCCESS   = "フォルダを作成しました。";
+    $MESSAGE_MAKE_DIR_FAILED    = "フォルダを作成できませんでした。";
+    $MESSAGE_UPLOAD_FAILED      = "ファイルをアップロードできませんでした。";
+    $MESSAGE_UPLOAD_CHOOSE_FILE = "ファイルを選択してください。";
+    $MESSAGE_UPLOAD_FILE_EXISTS = "同名ファイルが存在します。";
+    $MESSAGE_DELETE_SUCCESS     = "削除しました。";
+    $MESSAGE_DELETE_FALSE       = "削除できませんでした。";
+    $MESSAGE_CANT_READ          = "フォルダが読みとれません。";
+    $MESSAGE_EMPTY              = "フォルダ内は空っぽです。";
+    $MESSAGE_INFO_TITLE         = "ファイルをダウンロードするには";
+    $MESSAGE_INFOMATION         = "ファイル名の上でマウスの右ボタンをクリックし、メニューから".
+                                  "リンク先を名前をつけて保存を選択してください。";
+    $MESSAGE_IS_UPLOADED           = " をアップロードしました。";
+    /* English
+    // Button Text
+    $TEXT_UPLOAD_FILE           = "Upload file";
+    $TEXT_CREATE_DIRECTORY      = "Create directory";
+    $TEXT_CREATE                = "Create";
+    $TEXT_UPLOAD                = "Upload";
+    $TEXT_DELETE                = "Delete";
+    $TEXT_CANCEL                = "Cancel";
+    $TEXT_OVERWRITE             = "Overwrite";
+    // Text
+    $TEXT_UPLOAD_TITLE          = "Upload a file here.";
+    $TEXT_CREATE_TITLE          = "Create a directory here.";
+    $TEXT_DELETE_TITLE          = "Delete.";
+    $TEXT_TYPE_DIRECTORY_NAME   = "type directory name…";
+    // Message
     $MESSAGE_MAKE_DIR_SUCCESS   = "Create directory Success!";
     $MESSAGE_MAKE_DIR_FAILED    = "Create directory Faild!";
-    $MESSAGE_UPLOAD_SUCCESS     = "Upload file Success!";
     $MESSAGE_UPLOAD_FAILED      = "Upload file Failed!";
     $MESSAGE_UPLOAD_CHOOSE_FILE = "Choose a file.";
     $MESSAGE_UPLOAD_FILE_EXISTS = "A file already exists.";
@@ -30,6 +71,8 @@
                         "Select or [Save Target As...] (Internet Explorer)".
                         "or [Save Link As] (Firefox) from the pop-up menu.<br />".
                         "Select a folder to save the file and click [Save].";
+    $MESSAGE_IS_UPLOADED           = " is uploaded.";
+    */
     
     $message        = "";
     $array_dir      = array();
@@ -85,7 +128,7 @@
                 if (isset($_POST['check_overwrite']) || !file_exists($dir."/".$_FILES["file"]["name"])) {
                     if (move_uploaded_file($_FILES["file"]["tmp_name"], $dir."/".$_FILES["file"]["name"])) {
                         chmod($dir."/".$_FILES["file"]["name"], 0644);
-                        $proc_message = $_FILES["file"]["name"]." is uploaded.";
+                        $proc_message = $_FILES["file"]["name"].$MESSAGE_IS_UPLOADED;
                         $proc_class     = $ALERT_SUCCESS;
                     } else {
                         $proc_message = $MESSAGE_UPLOAD_FAILED;
@@ -191,12 +234,12 @@
             <span class="span12">
                 <a class="btn pull-right" data-toggle="modal" href="#uploadModal" >
                     <i class="icon-upload"></i>
-                    Upload file
+                    <?=$TEXT_UPLOAD_FILE?>
                 </a>
                 <span class="pull-right">&nbsp;</span>
                 <a class="btn pull-right" data-toggle="modal" href="#mkdirModal" >
                     <i class="icon-folder-close"></i>
-                    Create directory
+                    <?=$TEXT_CREATE_DIRECTORY?>
                 </a>
                 <br />&nbsp;
                 
@@ -204,22 +247,21 @@
                     <form class="form-inline" name="form_upload" id="form_upload" method="post" enctype="multipart/form-data" action="" >
                         <div class="modal-header">
                             <a class="close" data-dismiss="modal">×</a>
-                            <h3>Upload a file here.</h3>
+                            <h3><?=$TEXT_UPLOAD_TITLE?></h3>
                         </div>
                         <div class="modal-body">
                             <input type="file" class="btn" name="file" id="file" />
                             <label class="checkbox">
-                                <input type="checkbox" class="" name="check_overwrite" id="check_overwrite" /> Overwrite
+                                <input type="checkbox" class="" name="check_overwrite" id="check_overwrite" /> <?=$TEXT_OVERWRITE?>
                             </label>
                             <input type="hidden" name="proc" id="hd_upload" value="1" />
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-primary" id="btn_upload">
-                                <i class="icon-ok icon-white"></i>
-                                Upload
+                                <i class="icon-ok icon-white"></i><?=$TEXT_UPLOAD?>
                             </button>
                             <a href="" class="btn" data-dismiss="modal">
-                                <i class="icon-remove"></i>Cancel
+                                <i class="icon-remove"></i><?=$TEXT_CANCEL?>
                             </a>
                         </div>
                     </form>
@@ -229,18 +271,18 @@
                     <form class="form-inline" name="form_mkdir" id="form_mkdir" method="post" action="" >
                         <div class="modal-header">
                             <a class="close" data-dismiss="modal">×</a>
-                            <h3>Create a directory here.</h3>
+                            <h3><?=$TEXT_CREATE_TITLE?></h3>
                         </div>
                         <div class="modal-body">                        
-                            <input type="text" class="span5" name="txt_dir" id="txt_dir" placeholder="type directory name…" />
+                            <input type="text" class="span5" name="txt_dir" id="txt_dir" placeholder="<?=$TEXT_TYPE_DIRECTORY_NAME?>" />
                             <input type="hidden" name="proc" id="hd_mkdir" value="0" />
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-primary" id="btn_dir">
-                                <i class="icon-ok icon-white"></i>Create
+                                <i class="icon-ok icon-white"></i><?=$TEXT_CREATE?>
                             </button>
                             <a href="" class="btn" data-dismiss="modal">
-                                <i class="icon-remove"></i>Cancel
+                                <i class="icon-remove"></i><?=$TEXT_CANCEL?>
                             </a>
                         </div>
                     </form>
@@ -250,10 +292,10 @@
                     <form class="form-inline" name="form_delete" id="form_del" method="post" action="" >
                         <div class="modal-header">
                             <a class="close" data-dismiss="modal">×</a>
-                            <h3>Delete.</h3>
+                            <h3><?=$TEXT_DELETE_TITLE?></h3>
                         </div>
                         <div class="modal-body">  
-                            <p class="delete" id="txt_del">Delete</p>
+                            <p class="delete" id="txt_del"><?=$TEXT_DELETE?></p>
                             <p class="warntext" id="txt_warn">&nbsp;</p>
                             <input type="hidden" name="deltype" id="hd_deltype" value="0" />
                             <input type="hidden" name="name" id="hd_name" value="" />
@@ -261,11 +303,10 @@
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-danger" id="btn_del">
-                                <i class="icon-trash icon-white"></i>
-                                Delete
+                                <i class="icon-trash icon-white"></i><?=$TEXT_DELETE?>
                             </button>
                             <a href="" class="btn btn-primary" data-dismiss="modal">
-                                <i class="icon-remove icon-white"></i>Cancel
+                                <i class="icon-remove icon-white"></i><?=$TEXT_CANCEL?>
                             </a>
                         </div>
                     </form>
