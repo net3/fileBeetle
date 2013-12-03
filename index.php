@@ -362,7 +362,7 @@
                         print "</tr>".$CR;
                     }
                     
-                    print "</tbodt>".$CR;
+                    print "</tbody>".$CR;
                     print "</table>".$CR;
                 } else {
                     $message = $MESSAGE_EMPTY;
