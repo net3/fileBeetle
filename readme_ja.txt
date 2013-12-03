@@ -3,7 +3,8 @@
 ## 基本情報
 - ソフトウェア名称 : fileBeetle
 - 作成日 : 2012-04-30
-- Version : 1.0
+- 更新日 : 2013-12-03
+- Version : 1.0.1
 - License : GPL(GNU General Public License)
 - 作成者 : Takahashi Tetsuya
 - 連絡先 : https://twitter.com/#!/net3
@@ -33,3 +34,7 @@ PHP が動作する環境。
 共有ディレクトリで PHP が動作可能な環境では、 PHP ファイルをアップロードされると様々な処理が可能となってしまいます。共有ディレクトリで PHP を実行できないよう .htaccess などで制限してください。
 
 [jQuery](http://jquery.com/) および [Twitter Bootstrap](http://twitter.github.com/bootstrap/) を使用しています。両プロジェクトの開発に携わっている方々、ありがとうございます。
+
+## 更新履歴
+2013-12-03 ver 1.0.1
+index.php のタイプミスを修正。
